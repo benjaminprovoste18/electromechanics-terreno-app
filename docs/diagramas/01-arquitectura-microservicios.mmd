@@ -1,0 +1,33 @@
+flowchart LR
+    subgraph CEL["Celular del técnico o del supervisor"]
+        direction TB
+        APP["App EM Terreno<br/>Kotlin + Jetpack Compose<br/>MVVM"]
+        SQL[("SQLite local<br/>login de ambos roles<br/>y datos sin conexión")]
+        RF["Retrofit + OkHttp + Gson<br/>SyncRepository"]
+        APP --> SQL
+        APP --> RF
+    end
+
+    subgraph SRV["Backend Spring Boot 3.5 · Java 21 · Docker"]
+        direction TB
+        MS2["ms-ordenes<br/>:8082<br/>/api/ordenes<br/>/api/actividades"]
+        MS1["ms-sucursales<br/>:8081<br/>/api/sucursales"]
+        MS3["ms-jornadas<br/>:8083<br/>/api/jornadas<br/>/api/jornadas/resumen"]
+        MS3 -- "RestClient: sucursal<br/>más cercana" --> MS1
+    end
+
+    ORA[("Oracle Database 23ai Free<br/>esquema EMTERRENO<br/>puerto 1521")]
+
+    RF -- "HTTP / JSON<br/>GET · PUT" --> MS1
+    RF -- "HTTP / JSON<br/>GET · PUT" --> MS2
+    RF -- "HTTP / JSON<br/>GET · PUT" --> MS3
+    MS1 -- "JPA / Hibernate<br/>tabla SUCURSAL" --> ORA
+    MS2 -- "JPA / Hibernate<br/>ORDEN_TRABAJO<br/>REGISTRO_ACTIVIDAD" --> ORA
+    MS3 -- "JPA / Hibernate<br/>REGISTRO_JORNADA" --> ORA
+
+    classDef app fill:#E3ECF7,stroke:#0F2A4A,color:#0F2A4A
+    classDef ms fill:#FFF4D6,stroke:#B37A00,color:#3D2A00
+    classDef db fill:#E8F5E9,stroke:#2E7D32,color:#1B3D1D
+    class APP,RF app
+    class MS1,MS2,MS3 ms
+    class SQL,ORA db

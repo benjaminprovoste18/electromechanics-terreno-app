@@ -1,0 +1,25 @@
+sequenceDiagram
+    autonumber
+    actor T as Técnico
+    participant VM as TecnicoHomeViewModel
+    participant DB as SQLite local
+    participant SY as SyncRepository
+    participant MJ as ms-jornadas
+    participant MS as ms-sucursales
+    participant OR as Oracle
+
+    T->>VM: Marcar entrada (GPS + foto)
+    VM->>DB: INSERT registro_jornada (sincronizado = 0)
+    VM-->>T: Toast + vibración (funciona sin internet)
+    VM->>SY: solicitar()
+    SY->>MJ: PUT /api/jornadas/{id} (Retrofit)
+    MJ->>MS: GET /api/sucursales (RestClient)
+    MS->>OR: SELECT sucursal
+    MJ->>MJ: Haversine: distancia y radio 300 m
+    MJ->>OR: MERGE registro_jornada
+    MJ-->>SY: 200 OK + JSON
+    SY->>DB: UPDATE sincronizado = 1
+    SY->>MJ: GET /api/jornadas (descarga cambios)
+    SY->>DB: guarda lo que vino del servidor
+    DB-->>VM: Flow emite la lista nueva
+    VM-->>T: Banner "Sincronizado a las HH:mm"

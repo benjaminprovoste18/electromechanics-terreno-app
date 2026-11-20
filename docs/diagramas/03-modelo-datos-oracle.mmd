@@ -1,0 +1,50 @@
+erDiagram
+    SUCURSAL {
+        VARCHAR2 id_sucursal PK
+        VARCHAR2 nombre_cliente
+        VARCHAR2 direccion
+        FLOAT latitud
+        FLOAT longitud
+        NUMBER actualizado_en
+    }
+    ORDEN_TRABAJO {
+        VARCHAR2 id_servicio PK
+        VARCHAR2 id_tecnico
+        VARCHAR2 id_sucursal
+        NUMBER fecha_programada
+        VARCHAR2 estado
+        VARCHAR2 descripcion
+        VARCHAR2 actividades_requeridas
+        VARCHAR2 prioridad
+        VARCHAR2 foto_inicial
+        VARCHAR2 foto_final
+        NUMBER hora_inicio
+        NUMBER hora_termino
+        NUMBER aprobada
+    }
+    REGISTRO_ACTIVIDAD {
+        VARCHAR2 id_actividad PK
+        VARCHAR2 id_servicio FK
+        VARCHAR2 detalle
+        VARCHAR2 repuestos
+        VARCHAR2 estado_equipo
+        NUMBER hora_registro
+        VARCHAR2 comentarios
+    }
+    REGISTRO_JORNADA {
+        VARCHAR2 id_registro PK
+        VARCHAR2 id_empleado
+        VARCHAR2 tipo_marcacion
+        NUMBER fecha_hora
+        FLOAT latitud
+        FLOAT longitud
+        FLOAT precision_metros
+        VARCHAR2 id_sucursal_cercana
+        FLOAT distancia_metros
+        NUMBER dentro_de_radio
+        NUMBER ubicacion_simulada
+        NUMBER aprobado
+    }
+    ORDEN_TRABAJO ||--o{ REGISTRO_ACTIVIDAD : "tiene bitácora"
+    SUCURSAL ||--o{ ORDEN_TRABAJO : "se atiende en"
+    SUCURSAL ||--o{ REGISTRO_JORNADA : "más cercana"

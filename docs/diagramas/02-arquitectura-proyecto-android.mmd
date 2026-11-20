@@ -1,0 +1,58 @@
+flowchart TB
+    LOGIN["LoginScreen<br/>RUT + contraseña<br/>validado en SQLite"] -->|Rol EMPLEADO| TEC
+    LOGIN -->|Rol SUPERVISOR| SUP
+
+    subgraph TEC["Rol Técnico"]
+        direction TB
+        T1["TecnicoHomeScreen<br/>jornada + hoja de ruta"]
+        T2["ServicioDetalleScreen<br/>fotos y estados"]
+        T3["ActividadFormScreen<br/>bitácora"]
+        T4["HistorialJornadaScreen"]
+        TN["Recursos nativos:<br/>GPS · Cámara · Vibración<br/>Linterna · Notificaciones"]
+        T1 --> T2 --> T3
+        T1 --> T4
+        T1 -.-> TN
+    end
+
+    subgraph SUP["Rol Supervisor"]
+        direction TB
+        S1["SupervisorHomeScreen<br/>Órdenes · Auditoría · Equipo · Sucursales"]
+        S2["OrdenFormScreen"]
+        S3["UsuarioFormScreen"]
+        S4["SucursalFormScreen"]
+        SN["Recursos nativos:<br/>GPS al crear sucursal<br/>Notificaciones"]
+        S1 --> S2
+        S1 --> S3
+        S1 --> S4
+        S4 -.-> SN
+    end
+
+    TEC --> VM
+    SUP --> VM
+
+    subgraph MVVM["Capas MVVM"]
+        direction TB
+        VM["ui/viewmodel<br/>uiState con mutableStateOf"]
+        MOD["model<br/>estado de cada pantalla"]
+        DOM["domain<br/>validaciones y reglas puras"]
+        REP["data/repository<br/>única puerta a los datos"]
+        VM --> MOD
+        VM --> DOM
+        VM --> REP
+    end
+
+    REP --> LOCAL["data/local<br/>SQLiteOpenHelper + DAOs<br/>Flow reactivo"]
+    REP --> SYNC["data/sync<br/>SyncRepository<br/>StateFlow EstadoSync"]
+    SYNC --> REMOTE["data/remote<br/>RetrofitClient + APIs + DTOs"]
+    REMOTE --> BACK["Microservicios<br/>Spring Boot"]
+    VM --> DEV["device<br/>LocationProvider · CameraFileHelper<br/>NotificationHelper · Vibrador · Linterna"]
+    DI["di/AppContainer<br/>crea todo en un solo lugar"] -.-> REP
+    DI -.-> DEV
+    DI -.-> SYNC
+
+    classDef tec fill:#E3ECF7,stroke:#0F2A4A,color:#0F2A4A
+    classDef sup fill:#FFF4D6,stroke:#B37A00,color:#3D2A00
+    classDef capa fill:#F4F6FA,stroke:#4A5568,color:#14213D
+    class T1,T2,T3,T4,TN tec
+    class S1,S2,S3,S4,SN sup
+    class VM,MOD,DOM,REP,LOCAL,SYNC,REMOTE,DEV,DI capa
